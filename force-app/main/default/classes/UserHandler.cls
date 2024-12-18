@@ -31,17 +31,10 @@ public with sharing class UserHandler implements YATF.Handler {
                 }
                 // Update accounts
                 update accountsOwned;
+                System.debug('Accounts Reassigned to Manager: ' + accountsOwned.size()); 
                 // Create new account list view
-                MetadataService.MetadataPort service = new MetadataService.MetadataPort();
-                service.SessionHeader = new MetadataService.SessionHeader_element();
-                service.SessionHeader.sessionId = UserInfo.getSessionId();
-                MetadataService.ListView listView = new MetadataService.ListView();
-                listView.fullName = 'Account.MyListView';
-                listView.label = 'My List View';
-                listView.filterScope = 'Everything';
-                listView.columns = new List<String> { 'NAME' }; 
-                service.updateMetadata(new MetadataService.ListView[] { listView });
-                // changes here
+
+
              }
         }
     }

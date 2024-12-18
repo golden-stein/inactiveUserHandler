@@ -1,9 +1,9 @@
 // find manager (reporting) and assign to them
 
-global class UserHandler implements YATF.Handler {
+public with sharing class UserHandler implements YATF.Handler {
     
     
-    global void handle() {
+    public void handle() {
         updateExistingUsers((List<User>) Trigger.new, (Map<Id, User>) Trigger.oldMap);
     }
 
@@ -21,33 +21,26 @@ global class UserHandler implements YATF.Handler {
                 // Check if user owns any accounts
                 List<Account> accountsOwned = [SELECT Id FROM Account WHERE OwnerId = :newUser.Id];
                 if (accountsOwned.size() > 0) {
-                    // Get report id for accounts report
-                    List <Report> reportList = [SELECT Id,DeveloperName FROM Report where DeveloperName = 'Deactivated_User_Accounts_to_Reassign_PJB'];
-                    String reportId = (String)reportList.get(0).get('Id');
-                    // Get the report metadata
-                    Reports.ReportDescribeResult describe = Reports.ReportManager.describeReport(reportId);
-                    Reports.ReportMetadata reportMd = describe.getReportMetadata();
-                    // Override filter and run report
-                    Reports.ReportFilter filter = reportMd.getReportFilters()[0];
-                    filter.setValue(String.valueOf(newUser.Id));
-                    Reports.ReportResults reportResult = Reports.ReportManager.runReport(reportId, reportMd, true);
-                    // Save as new report and append developer name with deactivated user name
-                    Reports.Report rpr = new Reports.Report();
-                    String reportName = 'Deactivated User - ' + newUser.FirstName + ' ' + newUser.LastName;
-                    rpr.setName(reportName);
-                    rpr.setDeveloperName(reportName);
-                    // Save report
-                    Reports.ReportManager.saveReport(rpr);
-                    // Get new report url
-                    String url = String.valueOf(reportResult.getReportUrl());
-                    // Send email to user
-                    Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
-                    String[] toAddresses = new String[] {'alex.goldstein@headspace.com'};
-                    mail.setToAddresses(toAddresses);
-                    mail.setSubject('Deactivated User - ' + newUser.FirstName + ' ' + newUser.LastName + ' ' + 'has been deactivated');
-                    mail.setPlainTextBody('Accounts to Reassign: ' + url);
-                    Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+                    // Get manager of deactivated user
+                    Id managerId = [SELECT ManagerId FROM User WHERE Id = :newUser.Id].ManagerId;
+                    // Loop through accounts owned by user
+                    for (Account userOwnedAccount : accountsOwned) {
+                        // Assign to manager
+                        userOwnedAccount.OwnerId = managerId;
+                    }
                 }
+                // Update accounts
+                update accountsOwned;
+                // Create new account list view
+                MetadataService.MetadataPort service = new MetadataService.MetadataPort();
+                service.SessionHeader = new MetadataService.SessionHeader_element();
+                service.SessionHeader.sessionId = UserInfo.getSessionId();
+                MetadataService.ListView listView = new MetadataService.ListView();
+                listView.fullName = 'Account.MyListView';
+                listView.label = 'My List View';
+                listView.filterScope = 'Everything';
+                listView.columns = new List<String> { 'NAME' }; 
+                service.updateMetadata(new MetadataService.ListView[] { listView });
              }
         }
     }

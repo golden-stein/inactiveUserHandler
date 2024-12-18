@@ -20,7 +20,7 @@ public class UserHandlerTest {
         insert newUser;
         
         Account testAccount = new Account(
-            Name = 'Test Account',
+            Name = 'Test Account', 
             OwnerId = newUser.Id
         );
         insert testAccount;

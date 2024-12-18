@@ -1,35 +1,47 @@
 public with sharing class UserHandler implements YATF.Handler {
-        
+    
     public void handle() {
-        updateExistingUsers((List<User>) Trigger.new, (Map<Id, User>) Trigger.oldMap);
+        if (Trigger.isUpdate) {
+            updateExistingUsers((List<User>) Trigger.new, (Map<Id, User>) Trigger.oldMap);
+        }
     }
 
-    public void updateExistingUsers(List<User> newUsersList, Map<Id,User> oldUsersMap) {
-        Boolean userDeactivated;
+    public void updateExistingUsers(List<User> newUsersList, Map<Id, User> oldUsersMap) {
+        Set<Id> deactivatedUserIds = new Set<Id>();
         
-        for(User newUser : newUsersList) {
+        for (User newUser : newUsersList) {
             User oldUser = oldUsersMap.get(newUser.Id);
             
-            // Set variable
-            userDeactivated = (oldUser.IsActive == TRUE && newUser.IsActive == FALSE);
-            
-            // Check if user is deactivated
-             if (userDeactivated) {
-                // Check if user owns any accounts
-                List<Account> accountsOwned = [SELECT Id FROM Account WHERE OwnerId = :newUser.Id];
-                if (accountsOwned.size() > 0) {
-                    // Get manager of deactivated user
-                    Id managerId = [SELECT ManagerId FROM User WHERE Id = :newUser.Id].ManagerId;
-                    // Loop through accounts owned by user
-                    for (Account userOwnedAccount : accountsOwned) {
-                        // Assign to manager
-                        userOwnedAccount.OwnerId = managerId;
-                    }
-                }
-                // Update accounts
-                update accountsOwned;
-                System.debug('Accounts Reassigned to Manager: ' + accountsOwned.size()); 
-             }
+            // Ensure we're checking only for deactivations
+            if (oldUser.IsActive == true && newUser.IsActive == false) {
+                deactivatedUserIds.add(newUser.Id);
+            }
+        }
+
+        if (!deactivatedUserIds.isEmpty()) {
+            // Query and process as in the refactored logic shared earlier
+            List<Account> accountsToUpdate = [
+                SELECT Id, OwnerId 
+                FROM Account 
+                WHERE OwnerId IN :deactivatedUserIds
+            ];
+
+            Map<Id, Id> userToManagerMap = new Map<Id, Id>();
+            for (User user : [
+                SELECT Id, ManagerId 
+                FROM User 
+                WHERE Id IN :deactivatedUserIds
+            ]) {
+                userToManagerMap.put(user.Id, user.ManagerId);
+            }
+
+            for (Account account : accountsToUpdate) {
+                account.OwnerId = userToManagerMap.get(account.OwnerId);
+            }
+
+            if (!accountsToUpdate.isEmpty()) {
+                update accountsToUpdate;
+            }
         }
     }
 }

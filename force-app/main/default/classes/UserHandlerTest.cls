@@ -13,7 +13,7 @@ public class UserHandlerTest {
             TimeZoneSidKey = 'America/New_York',
             LocaleSidKey = 'en_US',
             EmailEncodingKey = 'UTF-8',
-            ProfileId = [SELECT Id FROM Profile WHERE Name = 'Headspace User' LIMIT 1].Id,
+            ProfileId = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1].Id,
             LanguageLocaleKey = 'en_US'
         );
         insert managerUser;
@@ -28,7 +28,7 @@ public class UserHandlerTest {
             TimeZoneSidKey = 'America/New_York',
             LocaleSidKey = 'en_US',
             EmailEncodingKey = 'UTF-8',
-            ProfileId = [SELECT Id FROM Profile WHERE Name = 'Headspace User' LIMIT 1].Id,
+            ProfileId = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1].Id,
             LanguageLocaleKey = 'en_US',
             ManagerId = managerUser.Id,
             IsActive = true
@@ -47,9 +47,9 @@ public class UserHandlerTest {
     }
 
     @isTest
-    static void testUpdateExistingUsers_UserDeactivated() {
-        // Fetch the regular user created in test setup
-        User regularUser = [SELECT Id, IsActive FROM User WHERE FirstName = 'Regular' AND LastName = 'User' LIMIT 1];
+    static void testUserDeactivationReassignAccounts() {
+        // Fetch the regular user and their accounts
+        User regularUser = [SELECT Id, IsActive FROM User WHERE FirstName = 'Regular' LIMIT 1];
         List<Account> userAccounts = [SELECT Id, OwnerId FROM Account WHERE OwnerId = :regularUser.Id];
         System.assertEquals(3, userAccounts.size(), 'Regular user should own 3 accounts.');
 
@@ -58,12 +58,11 @@ public class UserHandlerTest {
         updatedUser.IsActive = false;
 
         Test.startTest();
-        Test.setMock(YATF.Handler.class, new UserHandler());
-        update updatedUser;
+        update updatedUser; // Trigger logic will run
         Test.stopTest();
 
         // Verify accounts are reassigned to the manager
-        User managerUser = [SELECT Id FROM User WHERE FirstName = 'Manager' AND LastName = 'User' LIMIT 1];
+        User managerUser = [SELECT Id FROM User WHERE FirstName = 'Manager' LIMIT 1];
         List<Account> reassignedAccounts = [SELECT Id, OwnerId FROM Account WHERE Id IN :userAccounts];
         for (Account account : reassignedAccounts) {
             System.assertEquals(managerUser.Id, account.OwnerId, 'Account should be reassigned to the manager.');
@@ -71,8 +70,8 @@ public class UserHandlerTest {
     }
 
     @isTest
-    static void testUpdateExistingUsers_NoAccountsOwned() {
-        // Create a new user without any owned accounts
+    static void testNoAccountsOwned() {
+        // Create a user who owns no accounts
         User newUser = new User(
             FirstName = 'NoAccount',
             LastName = 'User',
@@ -93,12 +92,27 @@ public class UserHandlerTest {
         newUser.IsActive = false;
 
         Test.startTest();
-        Test.setMock(YATF.Handler.class, new UserHandler());
-        update newUser;
+        update newUser; // Trigger logic will run
         Test.stopTest();
 
-        // Verify no accounts were reassigned
+        // Verify no accounts are reassigned
         List<Account> accounts = [SELECT Id FROM Account WHERE OwnerId = :newUser.Id];
-        System.assertEquals(0, accounts.size(), 'No accounts should be owned by this user.');
+        System.assertEquals(0, accounts.size(), 'No accounts should exist for this user.');
+    }
+
+    @isTest
+    static void testNoDeactivation() {
+        // Fetch the regular user and simulate an update without deactivating
+        User regularUser = [SELECT Id, IsActive FROM User WHERE FirstName = 'Regular' LIMIT 1];
+        regularUser.FirstName = 'UpdatedName'; // Change unrelated field
+
+        Test.startTest();
+        update regularUser; // Trigger logic will run
+        Test.stopTest();
+
+        // Verify accounts still belong to the regular user
+        List<Account> accounts = [SELECT Id, OwnerId FROM Account WHERE OwnerId = :regularUser.Id];
+        System.assertEquals(3, accounts.size(), 'Accounts should remain with the regular user.');
     }
 }
+

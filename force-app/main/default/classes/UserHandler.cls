@@ -41,6 +41,7 @@ public with sharing class UserHandler implements YATF.Handler {
                 listView.filterScope = 'Everything';
                 listView.columns = new List<String> { 'NAME' }; 
                 service.updateMetadata(new MetadataService.ListView[] { listView });
+                // changes here
              }
         }
     }

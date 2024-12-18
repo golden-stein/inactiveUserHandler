@@ -1,8 +1,5 @@
-// find manager (reporting) and assign to them
-
 public with sharing class UserHandler implements YATF.Handler {
-    
-    
+        
     public void handle() {
         updateExistingUsers((List<User>) Trigger.new, (Map<Id, User>) Trigger.oldMap);
     }
@@ -32,9 +29,6 @@ public with sharing class UserHandler implements YATF.Handler {
                 // Update accounts
                 update accountsOwned;
                 System.debug('Accounts Reassigned to Manager: ' + accountsOwned.size()); 
-                // Create new account list view
-
-
              }
         }
     }

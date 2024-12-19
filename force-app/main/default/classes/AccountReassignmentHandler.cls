@@ -1,11 +1,14 @@
-global class AccountReassignmentHandler implements YATF.Handler {
+global class AccountReassignmentHandler implements Queueable {
 
-    global void handle() {
-        // This class may still contain some logic for handling account reassignment, if necessary.
+    private Set<Id> deactivatedUserIds;
+
+    // Constructor to pass deactivated user IDs
+    public AccountReassignmentHandler(Set<Id> deactivatedUserIds) {
+        this.deactivatedUserIds = deactivatedUserIds;
     }
 
-    @future
-    public static void reassignAccountsAsync(Set<Id> deactivatedUserIds) {
+    // Execute method for Queueable
+    global void execute(QueueableContext context) {
         // Find all accounts where the owner is one of the deactivated users
         List<Account> accountsToReassign = [SELECT Id, OwnerId FROM Account WHERE OwnerId IN :deactivatedUserIds];
 
@@ -32,5 +35,6 @@ global class AccountReassignmentHandler implements YATF.Handler {
         update accountsToReassign;
     }
 }
+
 
 

@@ -19,24 +19,30 @@ global with sharing class UserHandler implements YATF.Handler {
             }
         }
 
-        // If any users were deactivated, trigger the account reassignment logic
-        if(usersToDeactivate.size() > 0) {
+        // If any users were deactivated, publish the platform event
+        if (usersToDeactivate.size() > 0) {
             handleAccountReassignments(usersToDeactivate);
         }
     }
 
-    // Helper method to handle account reassignment after user deactivation
+    // Publish the Platform Event for account reassignment
     private void handleAccountReassignments(List<User> deactivatedUsers) {
-        Set<Id> deactivatedUserIds = new Set<Id>();
+        List<AccountReassignmentEvent__e> events = new List<AccountReassignmentEvent__e>();
 
+        // Prepare the event payload
         for (User u : deactivatedUsers) {
-            deactivatedUserIds.add(u.Id);
+            events.add(new AccountReassignmentEvent__e(
+                deactivatedUserIds__c = u.Id
+            ));
         }
 
-        // Enqueue the account reassignment logic to run in a separate transaction
-        System.enqueueJob(new AccountReassignmentHandler(deactivatedUserIds));
+        // Publish the platform event
+        if (!events.isEmpty()) {
+            Database.SaveResult[] results = EventBus.publish(events);
+        }
     }
 }
+
 
 
 

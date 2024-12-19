@@ -63,9 +63,9 @@ public class UserHandlerTest {
         regularUser.IsActive = false;
         update regularUser;
 
-        // Ensure that the future method has run and reassigned accounts
+        // Ensure that the platform event has fired and the account reassignment logic has been triggered
         Test.startTest();
-        // Call the future methods explicitly
+        // Call the event triggers explicitly
         Test.stopTest();
 
         // Fetch the reassigned accounts after the update
@@ -73,6 +73,7 @@ public class UserHandlerTest {
         
         // Check if the accounts were reassigned correctly to the manager
         for (Account account : reassignedAccounts) {
+            System.debug('Account Id: ' + account.Id + ', OwnerId: ' + account.OwnerId);
             System.assertEquals(managerUser.Id, account.OwnerId, 'Account should be reassigned to the manager.');
         }
 
@@ -80,6 +81,8 @@ public class UserHandlerTest {
         System.assertEquals(3, reassignedAccounts.size(), 'All accounts should be reassigned.');
     }
 }
+
+
 
 
 

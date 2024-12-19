@@ -1,14 +1,14 @@
-global class AccountReassignmentHandler implements Queueable {
+global class AccountReassignmentHandler {
 
-    private Set<Id> deactivatedUserIds;
+    @InvocableMethod
+    public static void handleAccountReassignments(List<AccountReassignmentEvent__e> events) {
+        Set<Id> deactivatedUserIds = new Set<Id>();
 
-    // Constructor to pass deactivated user IDs
-    public AccountReassignmentHandler(Set<Id> deactivatedUserIds) {
-        this.deactivatedUserIds = deactivatedUserIds;
-    }
+        // Extract deactivated user IDs from the platform event
+        for (AccountReassignmentEvent__e event : events) {
+            deactivatedUserIds.add(event.deactivatedUserIds__c);
+        }
 
-    // Execute method for Queueable
-    global void execute(QueueableContext context) {
         // Find all accounts where the owner is one of the deactivated users
         List<Account> accountsToReassign = [SELECT Id, OwnerId FROM Account WHERE OwnerId IN :deactivatedUserIds];
 
@@ -35,6 +35,7 @@ global class AccountReassignmentHandler implements Queueable {
         update accountsToReassign;
     }
 }
+
 
 
 

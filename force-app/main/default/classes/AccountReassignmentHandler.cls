@@ -1,4 +1,4 @@
-global class AccountReassignmentHandler {
+global with sharing class AccountReassignmentHandler {
 
     @InvocableMethod
     public static void handleAccountReassignments(List<AccountReassignmentEvent__e> events) {

@@ -1,47 +1,34 @@
 global with sharing class UserHandler implements YATF.Handler {
 
     global void handle() {
-        if (Trigger.isUpdate){
-            updateExistingUsers((List<User>)Trigger.new, (Map<Id, User>)Trigger.oldMap);
-        }
-    }
+        if (Trigger.isUpdate) {
+            List<User> deactivatedUsers = getDeactivatedUsers((List<User>) Trigger.new, (Map<Id, User>) Trigger.oldMap);
 
-    global void updateExistingUsers(List<User> newUsersList, Map<Id, User> oldUsersMap) {
-        Boolean userDeactivated = false;
-        List<User> usersToDeactivate = new List<User>();
+            for (User deactivatedUser : deactivatedUsers) {
+                // Fetch the manager for the user
+                User manager = [SELECT Id FROM User WHERE Id = :deactivatedUser.ManagerId LIMIT 1];
 
-        // Loop through Trigger.new to check if any users were deactivated
-        for (User newUser : newUsersList) {
-            User oldUser = oldUsersMap.get(newUser.Id);
-            // Check if the user was deactivated (IsActive was TRUE and is now FALSE)
-            if (oldUser.IsActive == TRUE && newUser.IsActive == FALSE) {
-                usersToDeactivate.add(newUser);
+                if (manager != null) {
+                    // Enqueue the first Queueable job
+                    System.enqueueJob(new AccountReassignmentJob(deactivatedUser.Id, manager.Id));
+                }
             }
         }
-
-        // If any users were deactivated, publish the platform event
-        if (usersToDeactivate.size() > 0) {
-            handleAccountReassignments(usersToDeactivate);
-        }
     }
 
-    // Publish the Platform Event for account reassignment
-    private void handleAccountReassignments(List<User> deactivatedUsers) {
-        List<AccountReassignmentEvent__e> events = new List<AccountReassignmentEvent__e>();
+    private List<User> getDeactivatedUsers(List<User> newUsers, Map<Id, User> oldUsersMap) {
+        List<User> deactivatedUsers = new List<User>();
 
-        // Prepare the event payload
-        for (User u : deactivatedUsers) {
-            events.add(new AccountReassignmentEvent__e(
-                deactivatedUserIds__c = u.Id
-            ));
+        for (User newUser : newUsers) {
+            User oldUser = oldUsersMap.get(newUser.Id);
+            if (oldUser.IsActive && !newUser.IsActive) {
+                deactivatedUsers.add(newUser);
+            }
         }
-
-        // Publish the platform event
-        if (!events.isEmpty()) {
-            Database.SaveResult[] results = EventBus.publish(events);
-        }
+        return deactivatedUsers;
     }
 }
+
 
 
 

@@ -1,6 +1,6 @@
-trigger UserTrigger on User (after update) {
-    // Create YATF Manager to manage the handlers
-    YATF.Manager handler = new YATF.Manager();
-    handler.manage();
+trigger UserTrigger on User (before update) {
+    // Call the handler to process deactivated users
+    UserHandler.processDeactivatedUsers(Trigger.new, Trigger.oldMap);
 }
+
 

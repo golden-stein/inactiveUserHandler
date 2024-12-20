@@ -1,33 +1,27 @@
-global with sharing class UserHandler implements YATF.Handler {
+public with sharing class UserHandler {
 
-    global void handle() {
-        if (Trigger.isUpdate) {
-            List<User> deactivatedUsers = getDeactivatedUsers((List<User>) Trigger.new, (Map<Id, User>) Trigger.oldMap);
+    public static void processDeactivatedUsers(List<User> newUsers, Map<Id, User> oldUsersMap) {
+        List<User> deactivatedUsers = new List<User>();
 
-            for (User deactivatedUser : deactivatedUsers) {
-                // Fetch the manager for the user
-                User manager = [SELECT Id FROM User WHERE Id = :deactivatedUser.ManagerId LIMIT 1];
-
-                if (manager != null) {
-                    // Enqueue the first Queueable job
-                    System.enqueueJob(new AccountReassignmentJob(deactivatedUser.Id, manager.Id));
+        // Identify users who have been deactivated
+        for (User u : newUsers) {
+            if (Trigger.isBefore) {
+                User oldUser = oldUsersMap.get(u.Id);
+                if (u.IsActive == FALSE && oldUser.IsActive == TRUE && oldUser != null) {
+                    deactivatedUsers.add(u);
                 }
             }
         }
-    }
-
-    private List<User> getDeactivatedUsers(List<User> newUsers, Map<Id, User> oldUsersMap) {
-        List<User> deactivatedUsers = new List<User>();
-
-        for (User newUser : newUsers) {
-            User oldUser = oldUsersMap.get(newUser.Id);
-            if (oldUser.IsActive && !newUser.IsActive) {
-                deactivatedUsers.add(newUser);
-            }
+        
+        // If there are deactivated users, enqueue the account reassignment job
+        if (deactivatedUsers.isEmpty() == FALSE) {
+            System.enqueueJob(new AccountReassignmentJob(deactivatedUsers));
         }
-        return deactivatedUsers;
     }
 }
+
+
+
 
 
 

@@ -1,41 +1,28 @@
 public class AccountReassignmentJob implements Queueable {
-    private Set<Id> deactivatedUserIds;
+    private List<User> deactivatedUsers;
 
-    public AccountReassignmentJob(Id userId, Id managerId) {
-        this.deactivatedUserIds = new Set<Id>{userId};
+    public AccountReassignmentJob(List<User> deactivatedUsers) {
+        this.deactivatedUsers = deactivatedUsers;
     }
 
     public void execute(QueueableContext context) {
-        System.debug('Starting AccountReassignmentJob with users: ' + deactivatedUserIds);
+        List<Account> accountsToReassign = new List<Account>();
 
-        // Fetch accounts to reassign
-        List<Account> accountsToReassign = [
-            SELECT Id, OwnerId, Owner.ManagerId 
-            FROM Account 
-            WHERE OwnerId IN :deactivatedUserIds
-        ];
-
-        System.debug('Accounts to reassign: ' + accountsToReassign);
-
-        Map<Id, Id> ownerToManagerMap = new Map<Id, Id>();
-        for (Account acc : accountsToReassign) {
-            if (acc.Owner.ManagerId != null) {
-                ownerToManagerMap.put(acc.OwnerId, acc.Owner.ManagerId);
+        // Collect all accounts to reassign
+        for (User u : deactivatedUsers) {
+            List<Account> accounts = [SELECT Id, OwnerId, Owner.ManagerId FROM Account WHERE OwnerId = :u.Id];
+            for (Account acc : accounts) {
+                // Assign to the manager
+                acc.OwnerId = acc.Owner.ManagerId;  
+                accountsToReassign.add(acc);
             }
         }
 
-        // Reassign accounts
-        List<Account> updatedAccounts = new List<Account>();
-        for (Account acc : accountsToReassign) {
-            if (ownerToManagerMap.containsKey(acc.OwnerId)) {
-                acc.OwnerId = ownerToManagerMap.get(acc.OwnerId);
-                updatedAccounts.add(acc);
-            }
-        }
-
-        if (!updatedAccounts.isEmpty()) {
-            System.debug('Updating accounts: ' + updatedAccounts);
-            update updatedAccounts;
+        // Update accounts with the new owner
+        if (!accountsToReassign.isEmpty()) {
+            update accountsToReassign;
         }
     }
 }
+
+

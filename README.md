@@ -1,18 +1,49 @@
-# Salesforce DX Project: Next Steps
+# inactiveUserHandler  
 
-Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
+**inactiveUserHandler** is a Salesforce Apex package designed to streamline account ownership transitions when a user record is deactivated. By leveraging a before update trigger, the package identifies deactivated users and assigns ownership of their accounts to their respective managers.  
 
-## How Do You Plan to Deploy Your Changes?
+## Features  
+- **Trigger-based automation**: Executes during the `before update` event on user records.  
+- **Account reassignment**: Automatically reassigns account ownership to the manager of the deactivated user.  
+- ***Scalable design**: Built using the Yet Another Trigger Framework (YATF) to ensure maintainability and scalability.*
 
-Do you want to deploy a set of changes, or create a self-contained application? Choose a [development model](https://developer.salesforce.com/tools/vscode/en/user-guide/development-models).
+## In Development 
+- **Oppoortunity reassignment**: Automatically reassigns opportunity ownership to the manager of the deactivated user.
+- **Case reassignment**: Automatically reassigns case ownership to the manager of the deactivated user.
+- **YATF Handling**: Add handling to match the existing Yet Another Trigger Framework (YATF) to ensure maintainability and scalability.
 
-## Configure Your Salesforce DX Project
+## Installation  
+1. Clone this repository to your local machine:  
+   ```bash  
+   git clone https://github.com/golden-stein/inactiveUserHandler.git  
+   ```  
 
-The `sfdx-project.json` file contains useful configuration information for your project. See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm) in the _Salesforce DX Developer Guide_ for details about this file.
+2. Deploy the Apex code to your Salesforce org using your preferred deployment tool:  
+   ```bash
+   sfdx force:source:deploy -p ./inactiveUserHandler
+   ```  
 
-## Read All About It
+## Usage  
+1. Ensure the trigger and handler class are deployed to your Salesforce org.  
+2. Activate the trigger for user updates.  
+3. When a user record is updated to inactive (`IsActive = false`), the trigger will execute the following steps:  
+   - Identify accounts, opportunities, and cases owned by the deactivated user.  
+   - Reassign ownership of those records to the user's manager. 
 
-- [Salesforce Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
-- [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
+## File Structure  
+- **`UserTrigger`**: The Apex trigger monitoring `before update` events on user records.  
+- **`UserHandler`**: The handler class containing the core logic for account reassignment.
+- **`AccountReassignmentJob`**: The handler class containing the core logic for account reassignment.  
+- **Test Classes**: Comprehensive unit tests ensuring robust functionality and code coverage.  
+
+## Development  
+This package ***will eventually*** adhere(s) to the [Yet Another Trigger Framework (YATF)]([https://github.com/kevinohara80/trigger-framework](https://github.com/callawaycloud/yet-another-trigger-framework)) to maintain a clean and organized structure for trigger logic.  
+
+## Contributions  
+Contributions, issues, and feature requests are welcome! Feel free to submit a pull request or open an issue.  
+
+## License  
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.  
+
+## Contact  
+For questions or feedback, please open an issue or contact [golden-stein](https://github.com/golden-stein).  

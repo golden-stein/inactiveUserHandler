@@ -1,6 +1,6 @@
 # inactiveUserHandler  
 
-**inactiveUserHandler** is a Salesforce Apex package designed to streamline account ownership transitions when a user record is deactivated. By leveraging a before update trigger, the package identifies deactivated users and assigns ownership of their accounts to their respective managers.  
+**inactiveUserHandler** is a Salesforce Apex package designed to streamline key record ownership transitions when a user is deactivated. By leveraging a before update trigger, the package identifies deactivated users and assigns ownership of their accounts, *opportunities*, and *cases* to their respective managers.  
 
 ## Features  
 - **Trigger-based automation**: Executes during the `before update` event on user records.  
@@ -33,7 +33,9 @@
 ## File Structure  
 - **`UserTrigger`**: The Apex trigger monitoring `before update` events on user records.  
 - **`UserHandler`**: The handler class containing the core logic for account reassignment.
-- **`AccountReassignmentJob`**: The handler class containing the core logic for account reassignment.  
+- **`AccountReassignmentJob`**: The handler class containing the core logic for account reassignment.
+- ***`OpportunityReassignmentJob`**: The handler class containing the core logic for opportunity reassignment.*
+- ***`CaseReassignmentJob`**: The handler class containing the core logic for case reassignment.* 
 - **Test Classes**: Comprehensive unit tests ensuring robust functionality and code coverage.  
 
 ## Development  
@@ -43,7 +45,7 @@ This package ***will eventually*** adhere(s) to the [Yet Another Trigger Framewo
 Contributions, issues, and feature requests are welcome! Feel free to submit a pull request or open an issue.  
 
 ## License  
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.  
+This project is licensed under the MIT License. See [LICENSE](https://en.wikipedia.org/wiki/MIT_License) for details.  
 
 ## Contact  
 For questions or feedback, please open an issue or contact [golden-stein](https://github.com/golden-stein).  

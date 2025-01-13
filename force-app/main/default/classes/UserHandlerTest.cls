@@ -38,6 +38,15 @@ public class UserHandlerTest {
         // Create an account owned by the regular user
         Account acc = new Account(Name = 'Test Account', OwnerId = regularUser.Id);
         insert acc;
+
+        // Create an opportunity owned by the regular user
+        Opportunity opp = new Opportunity(Name = 'Test Opportunity', OwnerId = regularUser.Id, AccountId = acc.Id, StageName = 'Discovery', CloseDate = Date.today() + 90, Amount = 100);
+        insert opp;
+
+        // Create a case owned by the regular user
+        Case c = new Case(OwnerId = regularUser.Id, Subject = 'Test Case', AccountId = acc.Id, Opportunity__c = opp.Id, Created_by_Flow__c = true, RecordTypeId = [SELECT Id FROM RecordType WHERE Name = 'Implementation Request' LIMIT 1].Id);
+        insert c;
+        System.debug('Created Case: ' + c);
     }
 
     // Test for Queueable Job
@@ -60,7 +69,7 @@ public class UserHandlerTest {
         // Assert that the queueable job was enqueued
         System.debug('Number of Queueable Jobs Enqueued: ' + Limits.getQueueableJobs());
         
-        System.assertEquals(1, Limits.getQueueableJobs(), 'One Queueable job should have been enqueued.');
+        System.assertEquals(2, Limits.getQueueableJobs(), 'Two Queueable jobs should have been enqueued.');
     }
 
     // Test for Account Reassignment
@@ -91,6 +100,65 @@ public class UserHandlerTest {
         // Assert that the account's owner was reassigned to the manager
         System.assertEquals(manager.Id, acc.OwnerId, 'The account should be reassigned to the manager.');
     }
+
+    // Test for Opportunity Reassignment
+    @IsTest
+    static void testOpportunityReassignment() {
+        // Ensure the setup data is correct before starting the test
+        User manager = [SELECT Id FROM User WHERE FirstName = 'Manager' LIMIT 1];
+        User regularUser = [SELECT Id, IsActive FROM User WHERE FirstName = 'Regular' LIMIT 1];
+
+        // Get the opportunity that is owned by the regular user
+        Opportunity opp = [SELECT Id, OwnerId FROM Opportunity WHERE OwnerId = :regularUser.Id LIMIT 1];
+
+        // Deactivate the regular user
+        regularUser.IsActive = false;
+
+        // Ensure the user update will trigger the reassign process
+        Test.startTest();
+
+        // Update the user to trigger the handler logic
+        update regularUser;
+
+        // Stop the test to make sure the queueable job is processed
+        Test.stopTest();
+
+        // Re-fetch the opportunity to check the owner
+        opp = [SELECT OwnerId FROM Opportunity WHERE Id = :opp.Id];
+
+        // Assert that the opportunity's owner was reassigned to the manager
+        System.assertEquals(manager.Id, opp.OwnerId, 'The opportunity should be reassigned to the manager.');
+    }
+
+    // Test for Case Reassignment
+    // @IsTest
+    // static void testCaseReassignment() {
+    //     // Ensure the setup data is correct before starting the test
+    //     User manager = [SELECT Id FROM User WHERE FirstName = 'Manager' LIMIT 1];
+    //     User regularUser = [SELECT Id, IsActive FROM User WHERE FirstName = 'Regular' LIMIT 1];
+
+    //     // Get the case that is owned by the regular user
+    //     Case c = [SELECT Id, OwnerId FROM Case WHERE OwnerId = :regularUser.Id LIMIT 1];
+    //     System.debug('Case Returned: ' + c);
+
+    //     // Deactivate the regular user
+    //     regularUser.IsActive = false;
+
+    //     // Ensure the user update will trigger the reassign process
+    //     Test.startTest();
+
+    //     // Update the user to trigger the handler logic
+    //     update regularUser;
+
+    //     // Stop the test to make sure the queueable job is processed
+    //     Test.stopTest();
+
+    //     // Re-fetch the case tp check the owner
+    //     c = [SELECT OwnerId FROM Case WHERE Id = :c.Id];
+
+    //     // Assert that the case was reassigned to the manager
+    //     System.AssertEquals(manager.Id, c.OwnerId, 'The case should be reassigned to the manager.');
+    // }    
 }
 
 

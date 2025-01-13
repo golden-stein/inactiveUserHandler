@@ -15,7 +15,17 @@ public with sharing class UserHandler {
         
         // If there are deactivated users, enqueue the account reassignment job
         if (deactivatedUsers.isEmpty() == FALSE) {
+            // Enqueue AccountReassignmentJob
             System.enqueueJob(new AccountReassignmentJob(deactivatedUsers));
+            System.debug('Enqueued AccountReassignmentJob');
+
+            // Enqueue OpportunityReassignmentJob
+            System.enqueueJob(new OpportunityReassignmentJob(deactivatedUsers));
+            System.debug('Enqueued OpportunityReassignmentJob');
+
+            // Enqueue CaseReassignmentJob
+            // System.enqueueJob(new CaseReassignmentJob(deactivatedUsers));
+            // System.debug('Enqueued CaseReassignmentJob');
         }
     }
 }

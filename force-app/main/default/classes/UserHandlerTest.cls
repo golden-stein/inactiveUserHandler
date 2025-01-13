@@ -13,7 +13,7 @@ public class UserHandlerTest {
             TimeZoneSidKey = 'America/New_York',
             LocaleSidKey = 'en_US',
             EmailEncodingKey = 'UTF-8',
-            ProfileId = [SELECT Id FROM Profile WHERE Name = 'Headspace User' LIMIT 1].Id,
+            ProfileId = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1].Id,
             LanguageLocaleKey = 'en_US'
         );
         insert manager;
@@ -28,7 +28,7 @@ public class UserHandlerTest {
             TimeZoneSidKey = 'America/New_York',
             LocaleSidKey = 'en_US',
             EmailEncodingKey = 'UTF-8',
-            ProfileId = [SELECT Id FROM Profile WHERE Name = 'Headspace User' LIMIT 1].Id,
+            ProfileId = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1].Id,
             LanguageLocaleKey = 'en_US',
             ManagerId = manager.Id,
             IsActive = true

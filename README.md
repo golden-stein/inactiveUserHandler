@@ -3,7 +3,6 @@
 **inactiveUserHandler** is a Salesforce Apex package designed to streamline key record ownership transitions when a user is deactivated. By leveraging a before update trigger, the package identifies deactivated users and assigns ownership of their accounts, *opportunities*, and *cases* to their respective managers.  
 
 ## Features  
-force-app/main/default/triggers/UserTrigger.trigger
 - **[Trigger-based automation](force-app/main/default/triggers/UserTrigger.trigger)**: Executes during the `before update` event on user records.  
 - **[Account reassignment](force-app/main/default/classes/AccountReassignmentJob.cls)**: Automatically reassigns account ownership to the manager of the deactivated user.
 - **[Opportunity reassignment](force-app/main/default/classes/OpportunityReassignmentJob.cls)**: Automatically reassigns opportunity ownership to the manager of the deactivated user. 

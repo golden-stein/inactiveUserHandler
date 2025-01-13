@@ -10,7 +10,6 @@ force-app/main/default/triggers/UserTrigger.trigger
 - ***Scalable design**: Built using the Yet Another Trigger Framework (YATF) to ensure maintainability and scalability.*
 
 ## In Development 
-- **Oppoortunity reassignment**: Automatically reassigns opportunity ownership to the manager of the deactivated user.
 - **Case reassignment**: Automatically reassigns case ownership to the manager of the deactivated user.
 - **YATF Handling**: Add handling to match the existing Yet Another Trigger Framework (YATF) to ensure maintainability and scalability.
 
@@ -36,7 +35,7 @@ force-app/main/default/triggers/UserTrigger.trigger
 - **`UserTrigger`**: The Apex trigger monitoring `before update` events on user records.  
 - **`UserHandler`**: The handler class containing the core logic for account reassignment.
 - **`AccountReassignmentJob`**: The handler class containing the core logic for account reassignment.
-- ***`OpportunityReassignmentJob`**: The handler class containing the core logic for opportunity reassignment.*
+- **`OpportunityReassignmentJob`**: The handler class containing the core logic for opportunity reassignment.
 - ***`CaseReassignmentJob`**: The handler class containing the core logic for case reassignment.* 
 - **Test Classes**: Comprehensive unit tests ensuring robust functionality and code coverage.  
 

@@ -4,7 +4,8 @@
 
 ## Features  
 - **Trigger-based automation**: Executes during the `before update` event on user records.  
-- **Account reassignment**: Automatically reassigns account ownership to the manager of the deactivated user.  
+- **[Account reassignment](force-app/main/default/classes/AccountReassignmentJob.cls)**: Automatically reassigns account ownership to the manager of the deactivated user.
+- **[Opportunity reassignment](force-app/main/default/classes/OpportunityReassignmentJob.cls)**: Automatically reassigns opportunity ownership to the manager of the deactivated user. 
 - ***Scalable design**: Built using the Yet Another Trigger Framework (YATF) to ensure maintainability and scalability.*
 
 ## In Development 
@@ -39,7 +40,7 @@
 - **Test Classes**: Comprehensive unit tests ensuring robust functionality and code coverage.  
 
 ## Development  
-This package ***will eventually*** adhere(s) to the [Yet Another Trigger Framework (YATF)]([https://github.com/kevinohara80/trigger-framework](https://github.com/callawaycloud/yet-another-trigger-framework)) to maintain a clean and organized structure for trigger logic.  
+This package ***will eventually*** adhere(s) to the [Yet Another Trigger Framework (YATF)]((https://github.com/callawaycloud/yet-another-trigger-framework)) to maintain a clean and organized structure for trigger logic.  
 
 ## Contributions  
 Contributions, issues, and feature requests are welcome! Feel free to submit a pull request or open an issue.  

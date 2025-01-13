@@ -41,7 +41,7 @@ force-app/main/default/triggers/UserTrigger.trigger
 - **Test Classes**: Comprehensive unit tests ensuring robust functionality and code coverage.  
 
 ## Development  
-This package ***will eventually*** adhere(s) to the [Yet Another Trigger Framework (YATF)]((https://github.com/callawaycloud/yet-another-trigger-framework)) to maintain a clean and organized structure for trigger logic.  
+This package ***will eventually*** adhere(s) to the [Yet Another Trigger Framework (YATF)](https://github.com/callawaycloud/yet-another-trigger-framework) to maintain a clean and organized structure for trigger logic.  
 
 ## Contributions  
 Contributions, issues, and feature requests are welcome! Feel free to submit a pull request or open an issue.  
